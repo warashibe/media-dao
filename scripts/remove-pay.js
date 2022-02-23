@@ -16,24 +16,25 @@ const main = async () => {
   const events = new Contract(contracts.EventsPayment, Events.abi, wallet)
   const storage = new Contract(contracts.Storage, Storage.abi, wallet)
   const jpyd = new Contract(contracts.JPYD, JPYD.abi, wallet_jpyd_owner)
-  const pay = await deploy(
-    "Pay",
-    50,
-    contracts.JPYD,
-    contracts.treasury,
-    contracts.Storage,
-    contracts.EventsPayment
+
+  const tx1 = await events.revokeRole(
+    await events.EMITTER_ROLE(),
+    contracts.previous_Pay
   )
-  console.log(`Pay: ${a(pay)}`)
-  const tx1 = await events.grantRole(await events.EMITTER_ROLE(), a(pay))
   await tx1.wait()
-  console.log("emitter role added")
-  const tx2 = await storage.grantRole(await storage.EDITOR_ROLE(), a(pay))
+  console.log("emitter role removed")
+  const tx2 = await storage.revokeRole(
+    await storage.EDITOR_ROLE(),
+    contracts.previous_Pay
+  )
   await tx2.wait()
-  console.log("editor role added")
-  const tx3 = await jpyd.grantRole(await jpyd.MINTER_ROLE(), a(pay))
+  console.log("editor role removed")
+  const tx3 = await jpyd.revokeRole(
+    await jpyd.MINTER_ROLE(),
+    contracts.previous_Pay
+  )
   await tx3.wait()
-  console.log("minter role added")
+  console.log("minter role removed")
 }
 
 main()

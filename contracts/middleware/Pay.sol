@@ -44,6 +44,10 @@ contract Pay is Ownable, EIP712MetaTransaction("Pay", "1")  {
   function toJPYD(uint amount) public view returns (uint){
     return amount * rate / 10 ** 18;
   }
+
+  function toASTR(uint amount) public view returns (uint){
+    return amount * 10 ** 18 / rate;
+  }
   
   function pay(address to, string memory ref, uint payback) public payable {
     require(msgSender() != to, "you cannot pay yourself");
@@ -51,8 +55,8 @@ contract Pay is Ownable, EIP712MetaTransaction("Pay", "1")  {
     uint amount = msg.value;
     uint jpyd = toJPYD(amount);
     require(minAmount < jpyd, "amount too small");
-    (, uint payback_amount) = _calcFees(jpyd, payback);
-    (uint tx_fee_astr,) = _calcFees(amount, payback);
+    (uint tx_fee_jpyd, uint payback_amount) = _calcFees(jpyd, payback);
+    uint tx_fee_astr = toASTR(tx_fee_jpyd);
     payable(to).transfer(amount - tx_fee_astr);
     payable(treasury).transfer(tx_fee_astr);
     IEventsPayment(events).payment(msgSender(), to, address(0), address(0), amount, amount, tx_fee_astr, ref, payback_amount);

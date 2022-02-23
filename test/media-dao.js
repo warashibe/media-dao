@@ -32,4 +32,11 @@ describe("Pay", function () {
     expect(from18(await pay.getIVP(a(sender))) * 1).to.equal(15)
     expect(from18(await pay.getPVP(a(receiver))) * 1).to.equal(15)
   })
+
+  it("Should enforce minFee", async function () {
+    await pay
+      .connect(sender)
+      .pay(a(receiver), "payment", 50, { value: to18("0.07") })
+    expect((await b(jpyd, sender)) * 1).to.equal(1)
+  })
 })
